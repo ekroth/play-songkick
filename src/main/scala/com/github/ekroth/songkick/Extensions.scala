@@ -34,9 +34,7 @@ trait Extensions {
     def allPages()(implicit app: Application, ec: ExecutionContext, srv: Credentials): Enumerator[ResultsPager[T]] =
       Enumerator(this) >>> Enumerator.unfoldM(this) { page =>
         page.nextPage.map { nextOpt =>
-          nextOpt.map { next =>
-            (next, next)
-          }
+          nextOpt.map(next => (next, next))
         }
       }
 
