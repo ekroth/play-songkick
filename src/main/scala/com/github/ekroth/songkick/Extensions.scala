@@ -24,16 +24,22 @@ trait Extensions {
     def isLastPage: Boolean = underlying.totalEntries - underlying.perPage * underlying.page <= 0
 
     def previousPage()(implicit app: Application, ec: ExecutionContext, srv: Credentials): Future[Option[ResultsPager[T]]] = {
-      if (isFirstPage) Future.successful(None)
-      else WS.url(query.withKey + s"&page=${underlying.page - 1}").get.map { resp =>
-        resp.json.validate[ResultsPage[T]].asOpt.map(_.withExt(query, key))
+      if (isFirstPage) {
+        Future.successful(None)
+      } else {
+        WS.url(query.withKey + s"&page=${underlying.page - 1}").get.map { resp =>
+          resp.json.validate[ResultsPage[T]].asOpt.map(_.withExt(query, key))
+        }
       }
     }
 
     def nextPage()(implicit app: Application, ec: ExecutionContext, srv: Credentials): Future[Option[ResultsPager[T]]] = {
-      if (isLastPage) Future.successful(None)
-      else WS.url(query.withKey + s"&page=${underlying.page + 1}").get.map { resp =>
-        resp.json.validate[ResultsPage[T]].asOpt.map(_.withExt(query, key))
+      if (isLastPage) {
+        Future.successful(None)
+      } else {
+        WS.url(query.withKey + s"&page=${underlying.page + 1}").get.map { resp =>
+          resp.json.validate[ResultsPage[T]].asOpt.map(_.withExt(query, key))
+        }
       }
     }
 

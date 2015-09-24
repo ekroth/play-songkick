@@ -62,6 +62,8 @@ private[songkick] trait Objects {
 
   /** The Json reads/writes macro can't handle generics very well. */
   object ResultsPage {
+    // scalastyle:off method.name
+
     implicit def ResultsPageWrites[T : Writes]: Writes[ResultsPage[T]] = (
       (JsPath \ "totalEntries").write[Int] and
         (JsPath \ "perPage").write[Int] and
