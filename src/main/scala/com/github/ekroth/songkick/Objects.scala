@@ -75,7 +75,10 @@ private[songkick] trait Objects {
         (JsPath \ "page").read[Int] and
         (JsPath \ "results").read[Map[String, Seq[T]]]
     )(ResultsPage.apply[T] _).compose(TypeNameFix.beforeRead)
+
+    def emptyAt(page: Int): ResultsPage[Nothing] = ResultsPage(0, 0, page, Map.empty)
+    val empty = emptyAt(1)
   }
-  case class ResultsPage[T](totalEntries: Int, perPage: Int, page: Int, results: Map[String, Seq[T]])
+  case class ResultsPage[+T](totalEntries: Int, perPage: Int, page: Int, results: Map[String, Seq[T]])
 
 }

@@ -16,7 +16,7 @@ trait Extensions {
   import play.api.libs.iteratee._
   import play.api.libs.ws._
 
-  class ResultsPager[T : Reads](private val query: String, private val key: String, private val underlying: ResultsPage[T]) {
+  class ResultsPager[T : Reads](val query: String, val key: String, val underlying: ResultsPage[T]) {
     /** If page is the first one. */
     def isFirstPage: Boolean = underlying.page == 1
 
