@@ -33,30 +33,66 @@ private[songkick] trait Objects {
     val beforeRead = Reads[JsValue] { js => JsSuccess(replace("type", "tipe")(js)) }
   }
 
+  object DisplayName {
+    implicit val DisplayNameWrites = Json.writes[DisplayName].transform(TypeNameFix.afterWrite)
+    implicit val DisplayNameTrackReads = Json.reads[DisplayName].compose(TypeNameFix.beforeRead)
+  }
+  case class DisplayName(displayName: String)
+
+  object MetroArea {
+    implicit val MetroAreaWrites = Json.writes[MetroArea].transform(TypeNameFix.afterWrite)
+    implicit val MetroAreaTrackReads = Json.reads[MetroArea].compose(TypeNameFix.beforeRead)
+  }
+  case class MetroArea(uri: String, displayName: String, country: DisplayName, id: Int, lng: Option[Double], lat: Option[Double], state: Option[DisplayName])
+
+  object City {
+    implicit val CityWrites = Json.writes[City].transform(TypeNameFix.afterWrite)
+    implicit val CityTrackReads = Json.reads[City].compose(TypeNameFix.beforeRead)
+  }
+  case class City(displayName: String, country: DisplayName, lng: Option[Double], lat: Option[Double])
+
+  object LocationArea {
+    implicit val LocationAreaWrites = Json.writes[LocationArea].transform(TypeNameFix.afterWrite)
+    implicit val LocationAreaTrackReads = Json.reads[LocationArea].compose(TypeNameFix.beforeRead)
+  }
+  case class LocationArea(city: City, metroArea: MetroArea)
+
+  object Date {
+    implicit val DateWrites = Json.writes[Date].transform(TypeNameFix.afterWrite)
+    implicit val DateTrackReads = Json.reads[Date].compose(TypeNameFix.beforeRead)
+  }
+  case class Date(time: Option[String], date: String, datetime: Option[String])
+
   object Location {
     implicit val LocationWrites = Json.writes[Location].transform(TypeNameFix.afterWrite)
     implicit val LocationTrackReads = Json.reads[Location].compose(TypeNameFix.beforeRead)
   }
-  case class Location(city: String, lng: Option[String], lat: Option[String])
-
-  object Date {
-    implicit val DateWrites = Json.writes[Date].transform(TypeNameFix.afterWrite)
-    implicit val DateReads = Json.reads[Date].compose(TypeNameFix.beforeRead)
-  }
-  case class Date(time: String, date: String, datetime: Option[String])
+  case class Location(city: String, lng: Option[Double], lat: Option[Double])
 
   object Venue {
     implicit val VenueWrites = Json.writes[Venue].transform(TypeNameFix.afterWrite)
-    implicit val VenueReads = Json.reads[Venue].compose(TypeNameFix.beforeRead)
+    implicit val VenueTrackReads = Json.reads[Venue].compose(TypeNameFix.beforeRead)
   }
-  case class Venue(displayName: String, id: Int, lng: Option[String], lat: Option[String])
+  case class Venue(id: Int, displayName: String, uri: String, lng: Option[Double], lat: Option[Double], metroArea: MetroArea)
 
-  case class Performance(displayName: String, id: Int, artist: Option[Artist], billingIndex: Option[Int], billing: Option[String])
+  object Artist {
+    implicit val ArtistWrites = Json.writes[Artist].transform(TypeNameFix.afterWrite)
+    implicit val ArtistTrackReads = Json.reads[Artist].compose(TypeNameFix.beforeRead)
+  }
+  case class Artist(uri: String, displayName: String, id: Int, identifier: Seq[JsValue])
 
-  case class Artist(uri: String, displayName: String, id: Int, identifier: Map[String, String], onTourUntil: Option[String])
+  object Performance {
+    implicit val PerformanceWrites = Json.writes[Performance].transform(TypeNameFix.afterWrite)
+    implicit val PerformanceTrackReads = Json.reads[Performance].compose(TypeNameFix.beforeRead)
+  }
+  case class Performance(artist: Artist, displayName: String, billingIndex: Int, id: Int, billing: String)
 
-  case class Event(displayName: String, tipe: String, uri: String, venue: Venue, location: Location, start: Date, performance: Seq[Performance], id: Int) {
-    require(tipe == "Concert", "API must be updated")
+  object Event {
+    implicit val EventWrites = Json.writes[Event].transform(TypeNameFix.afterWrite)
+    implicit val EventTrackReads = Json.reads[Event].compose(TypeNameFix.beforeRead)
+  }
+  case class Event(id: Int, tipe: String, uri: String, displayName: String, start: Date, performance: Seq[Performance], location: Location, venue: Venue, popularity: Double) {
+    require(tipe == "Concert")
   }
 
 
