@@ -23,6 +23,8 @@ trait Extensions {
     /** If page is the last one. */
     def isLastPage: Boolean = underlying.totalEntries - underlying.perPage * underlying.page <= 0
 
+    def items: Seq[T] = underlying.results.getOrElse(key, Seq.empty)
+
     def previousPage()(implicit app: Application, ec: ExecutionContext, srv: Credentials): Future[Option[ResultsPager[T]]] = {
       if (isFirstPage) {
         Future.successful(None)
@@ -52,7 +54,7 @@ trait Extensions {
 
     /** Current and all remaining items. */
     def allItems(implicit app: Application, ec: ExecutionContext, srv: Credentials): Future[Seq[T]] =
-      allPages().through(Enumeratee.map(_.underlying.results.getOrElse(key, Seq.empty))).run(Iteratee.consume[Seq[T]]())
+      allPages().through(Enumeratee.map(_.items)).run(Iteratee.consume[Seq[T]]())
   }
 
   implicit final class RichResultsPage[T : Reads](private val underlying: ResultsPage[T]) {
