@@ -4,7 +4,8 @@
  * http://opensource.org/licenses/MIT
  */
 
-package com.github.ekroth.songkick
+package com.github.ekroth
+package songkick
 
 /** Commands corresponding to the Songkick Web API. */
 trait Commands {
@@ -13,45 +14,52 @@ trait Commands {
   import scala.concurrent.Future
   import scala.concurrent.ExecutionContext
 
+  import scalaz._
+  import Scalaz._
+  import scalaz.contrib._
+  import scalaz.contrib.std._
+
   import play.api.Logger
   import play.api.Application
   import play.api.http.Status._
   import play.api.libs.ws._
   import play.api.libs.json._
 
-  private def pagerOf[T : Reads](query: String, key: String)(implicit app: Application, ec: ExecutionContext, srv: Credentials): Future[ResultsPager[T]] =
-    WS.url(query.withKey).get.map { resp =>
+  import errorhandling._
 
-//      println(resp.json.toString)
-      val page = (resp.json \ "resultsPage").validate[ResultsPage[T]] match {
-        case JsError(errs) => {
-          println(s"""Invalid json response: '${errs.mkString("\n")}'""")
-          ResultsPage.empty
+  private[songkick] def pagerOf[T : Reads](query: String, key: String)(implicit app: Application, ec: ExecutionContext, srv: Credentials): ResultF[ResultsPager[T]] =
+    Result.okF {
+      for {
+        resp <- WS.url(query.withKey).get()
+      } yield {
+
+        val pager = (resp.json \ "resultsPage").validate[ResultsPage[T]] match {
+          case JsSuccess(res, _) => res.withExt(query, key).right
+          case e : JsError => SongkickError.Json(e).left
         }
 
-        case JsSuccess(res, _) => res
-      }
-      val pager = page.withExt(query, key)
+        val proper = pager.fold(
+          l => pager,
+          { r =>
+            (resp.json \ "resultsPage" \ "results" \ key).validate[Seq[JsValue]] match {
+              case JsSuccess(res, _) if res.length == r.items.length => r.right
+              case JsSuccess(_, _) => SongkickError.Impl(s"parsing failed: pages are missing, json: ${resp.json}, $pager").left
+              case e : JsError => SongkickError.Json(e, s"parsing failed: invalid json, json: ${resp.json}, $pager").left
+            }
+          })
 
-      /* Check validity */
-      {
-        (resp.json \ "resultsPage" \ "results" \ key).validate[Seq[JsValue]] match {
-          case JsSuccess(res, _) => assert(res.length == pager.items.length)
-          case _ =>
-        }
+        proper
       }
-
-      pager
     }
 
   /* Search */
 
-  def locationNameSearch(query: String)(implicit app: Application, ec: ExecutionContext, srv: Credentials): Future[ResultsPager[LocationArea]] =
+  def locationNameSearch(query: String)(implicit app: Application, ec: ExecutionContext, srv: Credentials): ResultF[ResultsPager[LocationArea]] =
     pagerOf[LocationArea](s"http://api.songkick.com/api/3.0/search/locations.json?query=$query", "location")
 
 
   /* Calendars */
 
-  def metroEvents(id: String)(implicit app: Application, ec: ExecutionContext, srv: Credentials): Future[ResultsPager[Event]] =
+  def metroEvents(id: String)(implicit app: Application, ec: ExecutionContext, srv: Credentials): ResultF[ResultsPager[Event]] =
     pagerOf[Event](s"http://api.songkick.com/api/3.0/metro_areas/$id/calendar.json", "event")
 }
