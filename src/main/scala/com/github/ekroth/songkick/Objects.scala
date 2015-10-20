@@ -9,6 +9,8 @@ package com.github.ekroth.songkick
 /** Objects corresponding to Songkick's object model.
   */
 private[songkick] trait Objects {
+
+  import scala.collection.immutable.Seq
   import play.api.libs.json._
   import play.api.libs.functional.syntax._
 
