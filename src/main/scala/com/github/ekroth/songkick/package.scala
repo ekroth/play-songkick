@@ -11,10 +11,12 @@ package object songkick extends Objects {
 
   import errorhandling._
 
-  object SongkickError {
-    case class Permission(reason: String) extends Error
-    case class Json(error: play.api.libs.json.JsError, reason: String) extends Error
+  object SongkickError extends Errors {
+    case class Json(error: play.api.libs.json.JsError, json: play.api.libs.json.JsValue) extends Error {
+      override def reason = "unable to parse json"
+    }
     case class Impl(reason: String) extends Error
+    case class Usage(reason: String) extends Error
   }
 
   implicit class RichString(private val underlying: String) extends AnyVal {

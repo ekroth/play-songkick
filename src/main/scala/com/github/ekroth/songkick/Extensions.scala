@@ -52,7 +52,7 @@ trait Extensions {
     /** View page at specific index. */
     def pageAt(i: Int)(implicit app: Application, ec: ExecutionContext, srv: Credentials): ResultF[ResultsPager[T]] = {
       if (isLastPage) {
-        Result.failF(SongkickError.Permission("invalid page"))
+        Result.failF(SongkickError.Usage("invalid page"))
       } else {
         pagerOf[T](query + s"&page=$i", key)
       }
