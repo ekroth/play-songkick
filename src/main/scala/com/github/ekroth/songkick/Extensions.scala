@@ -38,13 +38,9 @@ trait Extensions {
 
     /** All items on all remaining pages. */
     def allItems(implicit app: Application, ec: ExecutionContext, srv: Credentials): ResultF[Seq[T]] = {
-
-      val pagesF = for {
-        i <- (underlying.page + 1) to totalPages
-        pageR = pageAt(i)
-      } yield pageR.run
-
-      val pages = Result.sequenceF(pagesF)
+      val indices = (underlying.page + 1) to totalPages
+      val pagesR = indices.map(pageAt)
+      val pages = Result.run(pagesR)
       val all = pages.map { page =>
         items ++ page.map(_.items).flatten
       }
