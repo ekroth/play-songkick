@@ -13,7 +13,7 @@ package object songkick extends Objects {
 
   object SongkickError {
     case class Permission(reason: String) extends Error
-    case class Json(error: play.api.libs.json.JsError, reason: String = "") extends Error
+    case class Json(error: play.api.libs.json.JsError, reason: String) extends Error
     case class Impl(reason: String) extends Error
   }
 
