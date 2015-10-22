@@ -10,6 +10,7 @@ package songkick
 trait Extensions {
   self: Commands =>
 
+  import scala.collection.immutable.Seq
   import scala.concurrent._
 
   import scalaz._
