@@ -75,7 +75,7 @@ private[songkick] trait Objects {
     implicit val VenueWrites = Json.writes[Venue].transform(TypeNameFix.afterWrite)
     implicit val VenueTrackReads = Json.reads[Venue].compose(TypeNameFix.beforeRead)
   }
-  case class Venue(id: Int, displayName: String, uri: String, lng: Option[Double], lat: Option[Double], metroArea: MetroArea)
+  case class Venue(id: Option[Int], displayName: String, uri: Option[String], lng: Option[Double], lat: Option[Double], metroArea: MetroArea)
 
   object Artist {
     implicit val ArtistWrites = Json.writes[Artist].transform(TypeNameFix.afterWrite)
