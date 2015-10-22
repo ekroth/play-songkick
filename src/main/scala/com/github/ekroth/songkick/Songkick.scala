@@ -6,4 +6,6 @@
 
 package com.github.ekroth.songkick
 
-trait Songkick extends Commands with Extensions
+trait Songkick {
+  val SongkickAPI: Commands with Extensions = new Commands with Extensions
+}
