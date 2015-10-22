@@ -81,7 +81,7 @@ private[songkick] trait Objects {
     implicit val ArtistWrites = Json.writes[Artist].transform(TypeNameFix.afterWrite)
     implicit val ArtistTrackReads = Json.reads[Artist].compose(TypeNameFix.beforeRead)
   }
-  case class Artist(uri: String, displayName: String, id: Int, identifier: Seq[JsValue])
+  case class Artist(uri: String, displayName: String, id: Int/*, identifier: Seq[JsValue]*/)
 
   object Performance {
     implicit val PerformanceWrites = Json.writes[Performance].transform(TypeNameFix.afterWrite)
@@ -93,9 +93,7 @@ private[songkick] trait Objects {
     implicit val EventWrites = Json.writes[Event].transform(TypeNameFix.afterWrite)
     implicit val EventTrackReads = Json.reads[Event].compose(TypeNameFix.beforeRead)
   }
-  case class Event(id: Int, tipe: String, uri: String, displayName: String, start: Date, performance: Seq[Performance], location: Location, venue: Venue, popularity: Double) {
-    require(tipe == "Concert")
-  }
+  case class Event(id: Int, tipe: String, uri: String, displayName: String, start: Date, performance: Seq[Performance], location: Location, venue: Venue, popularity: Double)
 
 
   /** The Json reads/writes macro can't handle generics very well. */
