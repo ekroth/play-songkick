@@ -25,4 +25,5 @@ package object songkick extends Objects {
 
     def escaped: String = play.utils.UriEncoding.encodePathSegment(underlying, "UTF-8")
   }
+
 }

@@ -20,15 +20,9 @@ trait Commands {
   import scalaz.contrib._
   import scalaz.contrib.std._
 
-  import play.api.Logger
-  import play.api.Application
-  import play.api.http.Status._
-  import play.api.libs.ws._
-  import play.api.libs.json._
-
   import errorhandling._
 
-  private[songkick] def pagerOf[T : Reads](query: String, key: String)(implicit app: Application, ec: ExecutionContext, srv: Credentials): ResultF[ResultsPager[T]] =
+/*  private[songkick] def pagerOf[T : Reads](query: String, key: String)(implicit app: Application, ec: ExecutionContext, srv: Credentials): ResultF[ResultsPager[T]] =
     Result.okF {
       (for {
         resp <- WS.url(query.withKey).get()
@@ -59,22 +53,22 @@ trait Commands {
         case x => SongkickError.Unknown(s"Odd error: $x").left
       }
     }
-
+ */
   /* Search */
 
-  def locationNameSearch(query: String)(implicit app: Application, ec: ExecutionContext, srv: Credentials): ResultF[ResultsPager[LocationArea]] =
+/*  def locationNameSearch(query: String)(implicit app: Application, ec: ExecutionContext, srv: Credentials): ResultF[ResultsPager[LocationArea]] =
     pagerOf[LocationArea](s"http://api.songkick.com/api/3.0/search/locations.json?query=${query.escaped}", "location")
-
+ */
   def artistSearch(query: String)(implicit app: Application, ec: ExecutionContext, srv: Credentials): ResultF[ResultsPager[Artist]] =
     pagerOf[Artist](s"http://api.songkick.com/api/3.0/search/artists.json?query=${query.escaped}", "artist")
 
 
   /* Calendars */
-
+/*
   def metroEvents(id: String)(implicit app: Application, ec: ExecutionContext, srv: Credentials): ResultF[ResultsPager[Event]] =
     pagerOf[Event](s"http://api.songkick.com/api/3.0/metro_areas/$id/calendar.json", "event")
 
   def artistEvents(id: Int)(implicit app: Application, ec: ExecutionContext, srv: Credentials): ResultF[ResultsPager[Event]] =
     pagerOf[Event](s"http://api.songkick.com/api/3.0/artists/$id/calendar.json", "event")
-
+ */
 }
