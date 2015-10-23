@@ -63,10 +63,10 @@ trait Commands {
   /* Search */
 
   def locationNameSearch(query: String)(implicit app: Application, ec: ExecutionContext, srv: Credentials): ResultF[ResultsPager[LocationArea]] =
-    pagerOf[LocationArea](s"http://api.songkick.com/api/3.0/search/locations.json?query=$query", "location")
+    pagerOf[LocationArea](s"http://api.songkick.com/api/3.0/search/locations.json?query=${query.escaped}", "location")
 
   def artistSearch(query: String)(implicit app: Application, ec: ExecutionContext, srv: Credentials): ResultF[ResultsPager[Artist]] =
-    pagerOf[Artist](s"http://api.songkick.com/api/3.0/search/artists.json?query=$query", "artist")
+    pagerOf[Artist](s"http://api.songkick.com/api/3.0/search/artists.json?query=${query.escaped}", "artist")
 
 
   /* Calendars */

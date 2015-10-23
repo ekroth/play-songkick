@@ -22,5 +22,7 @@ package object songkick extends Objects {
   implicit class RichString(private val underlying: String) extends AnyVal {
     def withKey()(implicit srv: Credentials): String =
       underlying + (if (underlying.contains('?')) '&' else '?') + s"apikey=${srv.key}"
+
+    def escaped: String = play.utils.UriEncoding.encodePathSegment(underlying, "UTF-8")
   }
 }
