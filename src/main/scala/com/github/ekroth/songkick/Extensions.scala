@@ -11,19 +11,18 @@ trait Extensions {
   self: Commands =>
 
   import scala.collection.immutable.Seq
-  import scala.concurrent._
+  import scala.concurrent.ExecutionContext
 
   import scalaz._
   import Scalaz._
 
-  import play.api.Application
-  import play.api.libs.json._
-  import play.api.libs.iteratee.{ Error => ItError, _ }
-  import play.api.libs.ws._
+  import akka.actor.ActorSystem
+  import akka.stream.Materializer
+  import spray.json._
 
   import errorhandling._
 
-  class ResultsPager[T : Reads](val query: String, val key: String, val underlying: ResultsPage[T]) {
+  class ResultsPager[T : JsonFormat](val query: String, val key: String, val underlying: ResultsPage[T]) {
 
     /** If page is the first one. */
     def isFirstPage: Boolean = underlying.page == 1
@@ -38,7 +37,7 @@ trait Extensions {
     def items: Seq[T] = underlying.results.getOrElse(key, Seq.empty)
 
     /** All items on all remaining pages. */
-    def allItems(implicit app: Application, ec: ExecutionContext, srv: Credentials): ResultF[Seq[T]] = {
+    def allItems(implicit sys: ActorSystem, fm: Materializer, ec: ExecutionContext, srv: Credentials): ResultF[Seq[T]] = {
       val indices = (underlying.page + 1) to totalPages
       val pagesR = indices.map(pageAt)
       val pages = Result.run(pagesR)
@@ -50,7 +49,7 @@ trait Extensions {
     }
 
     /** View page at specific index. */
-    def pageAt(i: Int)(implicit app: Application, ec: ExecutionContext, srv: Credentials): ResultF[ResultsPager[T]] = {
+    def pageAt(i: Int)(implicit sys: ActorSystem, fm: Materializer, ec: ExecutionContext, srv: Credentials): ResultF[ResultsPager[T]] = {
       if (isLastPage) {
         Result.failF(SongkickError.Usage("invalid page"))
       } else {
@@ -59,11 +58,11 @@ trait Extensions {
     }
 
     /** Next page. */
-    def nextPage()(implicit app: Application, ec: ExecutionContext, srv: Credentials): ResultF[ResultsPager[T]] =
+    def nextPage()(implicit sys: ActorSystem, fm: Materializer, ec: ExecutionContext, srv: Credentials): ResultF[ResultsPager[T]] =
       pageAt(underlying.page + 1)
   }
 
-  implicit final class RichResultsPage[T : Reads](private val underlying: ResultsPage[T]) {
+  implicit final class RichResultsPage[T : JsonFormat](private val underlying: ResultsPage[T]) {
     def withExt(query: String, key: String): ResultsPager[T] = new ResultsPager(query, key, underlying)
   }
 }
