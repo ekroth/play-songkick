@@ -4,7 +4,8 @@
  * http://opensource.org/licenses/MIT
  */
 
-package com.github.ekroth.songkick
+package com.github.ekroth
+package songkick
 
 trait Songkick {
   val SongkickAPI: Commands with Extensions = new Commands with Extensions

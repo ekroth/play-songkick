@@ -12,63 +12,54 @@ trait Commands {
   self: Extensions =>
 
   import scala.collection.immutable.Seq
-  import scala.concurrent.Future
   import scala.concurrent.ExecutionContext
 
   import scalaz._
   import Scalaz._
-  import scalaz.contrib._
-  import scalaz.contrib.std._
+
+  import akka.actor.ActorSystem
+  import akka.http.scaladsl.Http
+  import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._
+  import akka.http.scaladsl.model.HttpRequest
+  import akka.http.scaladsl.unmarshalling.Unmarshal
+  import akka.stream.Materializer
+  import spray.json._
 
   import errorhandling._
 
-/*  private[songkick] def pagerOf[T : Reads](query: String, key: String)(implicit app: Application, ec: ExecutionContext, srv: Credentials): ResultF[ResultsPager[T]] =
+  private val baseUrl = "http://api.songkick.com/api/3.0"
+
+  def pagerOf[T : JsonFormat](query: String, key: String)(implicit sys: ActorSystem, fm: Materializer, ec: ExecutionContext, srv: Credentials): ResultF[ResultsPager[T]] =
     Result.okF {
       (for {
-        resp <- WS.url(query.withKey).get()
+        resp <- Http().singleRequest(HttpRequest(uri = query.withKey))
+        js <- Unmarshal(resp.entity).to[JsValue]
       } yield {
 
-        val pager = (resp.json \ "resultsPage").validate[ResultsPage[T]] match {
-          case JsSuccess(res, _) => res.withExt(query, key).right
-          case e : JsError => SongkickError.Json(e, resp.json).left
-        }
-
-        val proper = pager.fold(
-          l => pager,
-          { r =>
-            if ((resp.json \ "resultsPage" \ "totalEntries") == JsNumber(0))
-              r.right
-            else {
-              (resp.json \ "resultsPage" \ "results" \ key).validate[Seq[JsValue]] match {
-                case JsSuccess(res, _) if res.length == r.items.length => r.right
-                case JsSuccess(_, _) => SongkickError.Impl(s"parsing failed: pages are missing, json: ${resp.json}, $pager").left
-                case e : JsError => SongkickError.Json(e, resp.json).left
-              }
-            }
-          })
-
-        proper
+        val JsObject(fields) = js.asJsObject
+        val out = fields("resultsPage").convertTo[ResultsPage[T]].withExt(query, key)
+        out.right
       }).recover {
         case x: Exception => SongkickError.Thrown(x).left
         case x => SongkickError.Unknown(s"Odd error: $x").left
       }
     }
- */
+
   /* Search */
 
-/*  def locationNameSearch(query: String)(implicit app: Application, ec: ExecutionContext, srv: Credentials): ResultF[ResultsPager[LocationArea]] =
-    pagerOf[LocationArea](s"http://api.songkick.com/api/3.0/search/locations.json?query=${query.escaped}", "location")
- */
-  def artistSearch(query: String)(implicit app: Application, ec: ExecutionContext, srv: Credentials): ResultF[ResultsPager[Artist]] =
-    pagerOf[Artist](s"http://api.songkick.com/api/3.0/search/artists.json?query=${query.escaped}", "artist")
+  def locationNameSearch(query: String)(implicit sys: ActorSystem, fm: Materializer, ec: ExecutionContext, srv: Credentials): ResultF[ResultsPager[LocationArea]] =
+    pagerOf[LocationArea](s"$baseUrl/locationsjson?query=${query.escaped}", "location")
+
+  def artistSearch(query: String)(implicit sys: ActorSystem, fm: Materializer, ec: ExecutionContext, srv: Credentials): ResultF[ResultsPager[Artist]] =
+    pagerOf[Artist](s"$baseUrl/search/artists.json?query=${query/*.escaped*/}", "artist")
 
 
   /* Calendars */
-/*
-  def metroEvents(id: String)(implicit app: Application, ec: ExecutionContext, srv: Credentials): ResultF[ResultsPager[Event]] =
-    pagerOf[Event](s"http://api.songkick.com/api/3.0/metro_areas/$id/calendar.json", "event")
 
-  def artistEvents(id: Int)(implicit app: Application, ec: ExecutionContext, srv: Credentials): ResultF[ResultsPager[Event]] =
-    pagerOf[Event](s"http://api.songkick.com/api/3.0/artists/$id/calendar.json", "event")
- */
+  def metroEvents(id: String)(implicit sys: ActorSystem, fm: Materializer, ec: ExecutionContext, srv: Credentials): ResultF[ResultsPager[Event]] =
+    pagerOf[Event](s"$baseUrl/metro_areas/$id/calendar.json", "event")
+
+  def artistEvents(id: Int)(implicit sys: ActorSystem, fm: Materializer, ec: ExecutionContext, srv: Credentials): ResultF[ResultsPager[Event]] =
+    pagerOf[Event](s"$baseUrl/artists/$id/calendar.json", "event")
+
 }

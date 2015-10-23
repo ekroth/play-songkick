@@ -12,10 +12,6 @@ package object songkick extends Objects {
   import errorhandling._
 
   object SongkickError extends Errors {
-    case class Json(error: play.api.libs.json.JsError, json: play.api.libs.json.JsValue) extends Error {
-      override def reason = "unable to parse json"
-    }
-    case class Impl(reason: String) extends Error
     case class Usage(reason: String) extends Error
   }
 
@@ -23,7 +19,7 @@ package object songkick extends Objects {
     def withKey()(implicit srv: Credentials): String =
       underlying + (if (underlying.contains('?')) '&' else '?') + s"apikey=${srv.key}"
 
-    def escaped: String = play.utils.UriEncoding.encodePathSegment(underlying, "UTF-8")
+   def escaped: String = akka.http.scaladsl.model.Uri.Path(underlying).toString
   }
 
 }
