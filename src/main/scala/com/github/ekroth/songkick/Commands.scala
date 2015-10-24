@@ -30,12 +30,11 @@ trait Commands {
   private val baseUrl = "http://api.songkick.com/api/3.0"
 
   def pagerOf[T : JsonFormat](query: String, key: String)(implicit sys: ActorSystem, fm: Materializer, ec: ExecutionContext, srv: Credentials): ResultF[ResultsPager[T]] =
-    Result.okF {
+    Result.async {
       (for {
         resp <- Http().singleRequest(HttpRequest(uri = query.withKey))
         js <- Unmarshal(resp.entity).to[JsValue]
       } yield {
-
         val JsObject(fields) = js.asJsObject
         val out = fields("resultsPage").convertTo[ResultsPage[T]].withExt(query, key)
         out.right
