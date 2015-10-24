@@ -1,4 +1,4 @@
-name := """play-songkick"""
+name := """akka-songkick"""
 
 version := "1.0-SNAPSHOT"
 
