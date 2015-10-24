@@ -14,6 +14,7 @@ trait Objects {
   import scala.collection.immutable.Seq
 
   import spray.json._
+  import DefaultJsonProtocol._
 
   implicit class RichJsonFormat[T](val underlying: JsonFormat[T]) {
 
@@ -32,57 +33,57 @@ trait Objects {
     }
   }
 
-  object DisplayName extends DefaultJsonProtocol {
+  object DisplayName {
     implicit val displayNameFormat = jsonFormat1(DisplayName.apply).withTipe
   }
   case class DisplayName(displayName: String)
 
-  object MetroArea extends DefaultJsonProtocol {
+  object MetroArea {
     implicit val metroAreaFormat = jsonFormat7(MetroArea.apply).withTipe
   }
   case class MetroArea(uri: String, displayName: String, country: DisplayName, id: Int, lng: Option[Double], lat: Option[Double], state: Option[DisplayName])
 
-  object City extends DefaultJsonProtocol {
+  object City {
     implicit val cityFormat = jsonFormat4(City.apply).withTipe
   }
   case class City(displayName: String, country: DisplayName, lng: Option[Double], lat: Option[Double])
 
-  object LocationArea extends DefaultJsonProtocol {
+  object LocationArea {
     implicit val locationAreaFormat = jsonFormat2(LocationArea.apply).withTipe
   }
   case class LocationArea(city: City, metroArea: MetroArea)
 
-  object Date extends DefaultJsonProtocol {
+  object Date {
     implicit val dateFormat = jsonFormat3(Date.apply).withTipe
   }
   case class Date(time: Option[String], date: String, datetime: Option[String])
 
-  object Location extends DefaultJsonProtocol {
+  object Location {
     implicit val locationFormat = jsonFormat3(Location.apply).withTipe
   }
   case class Location(city: String, lng: Option[Double], lat: Option[Double])
 
-  object Venue extends DefaultJsonProtocol {
+  object Venue {
     implicit val venueFormat = jsonFormat6(Venue.apply).withTipe
   }
   case class Venue(id: Option[Int], displayName: String, uri: Option[String], lng: Option[Double], lat: Option[Double], metroArea: MetroArea)
 
-  object Artist extends DefaultJsonProtocol {
+  object Artist {
     implicit val artistFormat = jsonFormat3(Artist.apply).withTipe
   }
   case class Artist(uri: String, displayName: String, id: Int/*, identifier: Seq[JsValue]*/)
 
-  object Performance extends DefaultJsonProtocol {
+  object Performance {
     implicit val performanceFormat = jsonFormat5(Performance.apply).withTipe
   }
   case class Performance(artist: Artist, displayName: String, billingIndex: Int, id: Int, billing: String)
 
-  object Event extends DefaultJsonProtocol {
+  object Event {
     implicit val eventFormat = jsonFormat8(Event.apply).withTipe
   }
   case class Event(id: Int, tipe: String, uri: String, displayName: String, start: Date, /*performance: Seq[Performance],*/ location: Location, venue: Venue, popularity: Double)
 
-  object ResultsPage extends DefaultJsonProtocol {
+  object ResultsPage {
     implicit def resultsPageFormat[T : JsonFormat] = jsonFormat4(ResultsPage.apply[T]).withTipe
     def emptyAt(page: Int): ResultsPage[Nothing] = ResultsPage(0, 0, page, Map.empty)
     val empty = emptyAt(1)
